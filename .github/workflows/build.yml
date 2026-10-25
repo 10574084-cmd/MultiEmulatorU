@@ -1,0 +1,38 @@
+name: Build MultiEmulatorU (Wii U)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkitppc:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build with devkitPro WUT
+        run: |
+          set -eux
+          test -n "${DEVKITPRO}"
+          test -f "${DEVKITPRO}/wut/share/wut_rules"
+          make
+
+      - name: Collect outputs
+        if: always()
+        run: |
+          mkdir -p artifacts
+          find . -maxdepth 3 -type f \( -name '*.wuhb' -o -name '*.rpx' -o -name '*.elf' -o -name '*.map' \) -exec cp {} artifacts/ \; || true
+          if [ -z "$(find artifacts -type f -print -quit)" ]; then
+            echo "No Wii U binary was produced. Inspect the build log; this is not an installable release." > artifacts/BUILD-STATUS.txt
+          fi
+
+      - name: Upload build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MultiEmulatorU-build
+          path: artifacts/
+          if-no-files-found: warn
