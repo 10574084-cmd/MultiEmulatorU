@@ -3,6 +3,7 @@
 #include <whb/log.h>
 #include <whb/log_console.h>
 #include <vpad/input.h>
+#include <coreinit/thread.h>
 
 int main(int, char**) {
     WHBProcInit();
@@ -34,7 +35,7 @@ int main(int, char**) {
                 WHBLogPrintf("\nSelected: %s\nNo emulator core is linked in this prototype.\n", systems[selected]);
             }
         }
-        WHBProcSleep();
+        OSSleepTicks(1000000);
     }
 
     WHBLogConsoleFree();
